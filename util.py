@@ -691,6 +691,7 @@ class Edge:
         self.verts = (v1, v2)
         self.bearing = bearing # bearing from v1 to v2
         self.back_edge = False
+        self.explored = False
 
     def oppositeTo(self, v):
         if(self.verts[0] == v):
@@ -706,6 +707,12 @@ class Edge:
         else:
             print "VERTS BOTH VISITED"
             return -1
+
+    def containsState(self, state):
+        return self.verts[0].state == state or self.verts[1].state == state
+
+    def printSelf(self):
+        print "[ ", self.verts[0].state, ", ", self.verts[1].state, ", '", self.bearing, "' ]"
 
 
 class Graph:
@@ -723,6 +730,10 @@ class Graph:
     def insertEdge(self, v1, v2, bearing):
         "Add an edge to the graph"
         new_edge = Edge(v1, v2, bearing)
+
+        # if(v1.state == (2, 3) or v2.state == (2, 3)):
+        #     print "Adding edge to (2, 3): ", "[", new_edge.verts[0].state, ", ", new_edge.verts[1].state, "]"
+
         v1.edges.append(new_edge)
         v2.edges.append(new_edge)
         self.edges.append(new_edge)
@@ -734,11 +745,29 @@ class Graph:
                 return vert
         return None
 
+    def markEdgeExplored(self, e):
+        "Mark copies of this edge explored in its vertex lists (but not the graph's) lists"
+        e.explored = True
+        # find the edge in each vertex's list and mark explored
+        for edge in e.verts[0].edges:
+            if(edge == e):
+                edge.explored = True
+                continue
+        for edge in e.verts[1].edges:
+            if(edge == e):
+                edge.explored = True
+                continue
+
     def isEmpty(self):
         "Returns true if the graph is empty"
         return len(self.verts) == 0
 
-    # def goToSibling(vertex):
-    #     "Does this vertex have a sibling (tree)? If not, return None, else return sibling vertex"
-    #     pass
+    def printSelf(self):
+        "Print the graph's state"
+        print "Vertices: "
+        for vert in self.verts:
+            print vert.state
+        print "Edges: "
+        for edge in self.edges:
+            edge.printSelf()
 

@@ -72,58 +72,65 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
-def generateDFSTree(problem, graph, edge_stack, current_vertex):
+def generateDFSTree(problem, graph, current_vertex):
     """
     Recursively called algorithm which expands a given graph along the way and
     returns the first time food is found. Assumes food exists.
     """
-    while(not problem.isGoalState(current_vertex.state)):
-      # print "Current Vert State: ", current_vertex.state
-      if(current_vertex.state == (2, 2)):
-        print "Successors to (2, 2): ", problem.getSuccessors(current_vertex.state)
-      # if(current_vertex.state == (5, 5)):
-      #   print "Vertices in graph: "
-      #   for vert in graph.verts:
-      #     print vert.state, ", "
-      #   print "Edges in graph: "
-      #   for edge in graph.edges:
-      #     print "[", edge.verts[0].state, ", ", edge.verts[1].state, "], "
-      current_vertex.visited = True
-      # insert newly discovered vertices and edges
-      # print "Next Successors: ", problem.getSuccessors(current_vertex.state)
-      for successor in problem.getSuccessors(current_vertex.state):
-        if(current_vertex.state == (2, 2)):
-          print "Current successor: ", successor
-        add_this_edge = True
-        # search adjacency list of current vertex to ensure we haven't seen an edge with the successor
-        for edge in current_vertex.edges:
-          # print "In loop on edge [", edge.verts[0].state, ", ", edge.verts[1].state, "]"
-          if(edge.oppositeTo(current_vertex).state == successor[0]):
-            add_this_edge = False
-            print "Don't add duplicate edge from ", current_vertex.state, " to ", edge.oppositeTo(current_vertex).state
-            continue
-        successor_vert = graph.findVertOfState(successor[0])      # O(n) every time. is this graph representation bad?
-        # add to graph if appropriate
-        if(successor_vert == None): 
-          print "Inserting new vert at ", successor[0]
-          successor_vert = graph.insertVertex(successor[0], current_vertex)
-        if(add_this_edge):
-          print "Inserting new edge from ", current_vertex.state, " to ", successor_vert.state
-          edge_stack.push(graph.insertEdge(current_vertex, successor_vert, successor[1]))
-      if(edge_stack.isEmpty()):
-        # print "EMPTY EDGE STACK"
-        return -1
-      new_edge = edge_stack.pop()
-      current_vertex = new_edge.getNonVisitedVertex()
-      if(current_vertex.state == (2, 1)):
-        print "JUST POPPED (2, 1)"
-      if(not current_vertex.visited):
-        # set edge label to discovery?
-        return generateDFSTree(problem, graph, edge_stack, current_vertex)
-      else:
-        new_edge.back_edge = True
-    print "Returning ", current_vertex.state
-    return current_vertex
+    if(problem.isGoalState(current_vertex.state)):
+      print "Returning goal vertex at ", current_vertex.state
+      return current_vertex
+    
+    current_vertex.visited = True
+    # insert newly discovered vertices and edges
+    for successor in problem.getSuccessors(current_vertex.state):
+      add_this_edge = True
+      # search adjacency list of current vertex to ensure we haven't seen an edge with the successor
+      for edge in current_vertex.edges:
+        if(edge.oppositeTo(current_vertex).state == successor[0]):
+          add_this_edge = False
+          continue
+      successor_vert = graph.findVertOfState(successor[0])      # copy or reference returned?
+      # add to graph if appropriate
+      if(successor_vert == None): 
+        successor_vert = graph.insertVertex(successor[0], current_vertex)
+      if(add_this_edge):
+        graph.insertEdge(current_vertex, successor_vert, successor[1])
+    
+    # i = 1
+    # print "All edges at ", current_vertex.state, ": "
+    # for edge in current_vertex.edges:
+    #   print "[", edge.verts[0].state, ", ", edge.verts[1].state, "]"
+    # print "BEFORE FOR LOOP at ", current_vertex.state, ", vertex edges = "
+    for edge in current_vertex.edges:
+        edge.printSelf()
+    initial_vertex = current_vertex # copy in order to keep track with prints
+    for new_edge in current_vertex.edges:
+      print "At ", initial_vertex.state
+      # print "AFTER FOR LOOP DECLARATION at ", current_vertex.state, ", vertex edges = "
+      # for edge in current_vertex.edges:
+      #   edge.printSelf()
+      # print "Edge ", i, " of ", current_vertex.state, ": [", new_edge.verts[0].state, ", ", new_edge.verts[1].state, new_edge.bearing, "]"
+      # print "All edges at ", current_vertex.state, ": "
+      # print "At ", current_vertex.state, " for the ", i, "-th time"
+      # for edge in current_vertex.edges:
+      #   print "[", edge.verts[0].state, ", ", edge.verts[1].state, edge.bearing, "]"
+      # i += 1
+      # if(new_edge.containsState((2,2))):
+      #   print "At (2, 2)"
+      # print "Is this edge adjacent to the current vertex? : "
+      if(not new_edge.explored):
+        print "Haven't explored: "
+        new_edge.printSelf()
+        graph.markEdgeExplored(new_edge)
+        if(not new_edge.oppositeTo(initial_vertex).visited): # if the proposed new vertex has already been visited, don't go there.
+          current_vertex = new_edge.oppositeTo(initial_vertex)
+          print "Next recurse at ", current_vertex.state
+          generateDFSTree(problem, graph, current_vertex)
+          print "Done with recurse at ", current_vertex.state # are we sure this is the same vertex?
+        else:
+          print "back edge"
+          new_edge.back_edge = True
     
 
 def depthFirstSearch(problem):
@@ -141,10 +148,10 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     graph = util.Graph()
-    edge_stack = util.Stack() # the next edges to visit in search
 
     start_vertex = graph.insertVertex(problem.getStartState(), None)
-    food_vertex = generateDFSTree(problem, graph, edge_stack, start_vertex)
+    food_vertex = generateDFSTree(problem, graph, start_vertex)
+    graph.printSelf()
     # trace the path
     curr = food_vertex
     path_stk = util.Stack()
@@ -156,7 +163,6 @@ def depthFirstSearch(problem):
     path = []
     while(not path_stk.isEmpty()):
       path.append(path_stk.pop())
-    print path
     return path
     util.raiseNotDefined()
 
