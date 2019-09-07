@@ -720,6 +720,7 @@ class Graph:
     def __init__(self):
         self.verts = []
         self.edges = []
+        self.goal_vert = None
 
     def insertVertex(self, state, parent):
         "Add a vertex to the graph"
