@@ -75,22 +75,54 @@ def tinyMazeSearch(problem):
 def generateDFSTree(problem, graph, edge_stack, current_vertex):
     """
     Recursively called algorithm which expands a given graph along the way and
-    returns the first time food is found
+    returns the first time food is found. Assumes food exists.
     """
-    current_vertex.visited = True
     while(not problem.isGoalState(current_vertex.state)):
+      # print "Current Vert State: ", current_vertex.state
+      if(current_vertex.state == (2, 2)):
+        print "Successors to (2, 2): ", problem.getSuccessors(current_vertex.state)
+      # if(current_vertex.state == (5, 5)):
+      #   print "Vertices in graph: "
+      #   for vert in graph.verts:
+      #     print vert.state, ", "
+      #   print "Edges in graph: "
+      #   for edge in graph.edges:
+      #     print "[", edge.verts[0].state, ", ", edge.verts[1].state, "], "
+      current_vertex.visited = True
       # insert newly discovered vertices and edges
+      # print "Next Successors: ", problem.getSuccessors(current_vertex.state)
       for successor in problem.getSuccessors(current_vertex.state):
-        # need a check to see if we've seen vert/edge before, maybe isn't the perfect usage of successor
-        new_vert = graph.insertVertex(successor[0][0], current_vertex)
-        edge_stack.push(graph.insertEdge(current_vertex, new_vert, successor[0][1]))
-      new_edge = edge_stack.pop()                                                     # if unique edge, has not been explored yet
-      current_vertex = new_edge.verts[1]
+        if(current_vertex.state == (2, 2)):
+          print "Current successor: ", successor
+        add_this_edge = True
+        # search adjacency list of current vertex to ensure we haven't seen an edge with the successor
+        for edge in current_vertex.edges:
+          # print "In loop on edge [", edge.verts[0].state, ", ", edge.verts[1].state, "]"
+          if(edge.oppositeTo(current_vertex).state == successor[0]):
+            add_this_edge = False
+            print "Don't add duplicate edge from ", current_vertex.state, " to ", edge.oppositeTo(current_vertex).state
+            continue
+        successor_vert = graph.findVertOfState(successor[0])      # O(n) every time. is this graph representation bad?
+        # add to graph if appropriate
+        if(successor_vert == None): 
+          print "Inserting new vert at ", successor[0]
+          successor_vert = graph.insertVertex(successor[0], current_vertex)
+        if(add_this_edge):
+          print "Inserting new edge from ", current_vertex.state, " to ", successor_vert.state
+          edge_stack.push(graph.insertEdge(current_vertex, successor_vert, successor[1]))
+      if(edge_stack.isEmpty()):
+        # print "EMPTY EDGE STACK"
+        return -1
+      new_edge = edge_stack.pop()
+      current_vertex = new_edge.getNonVisitedVertex()
+      if(current_vertex.state == (2, 1)):
+        print "JUST POPPED (2, 1)"
       if(not current_vertex.visited):
         # set edge label to discovery?
-        generateDFSTree(problem, graph, edge_stack, current_vertex)
+        return generateDFSTree(problem, graph, edge_stack, current_vertex)
       else:
         new_edge.back_edge = True
+    print "Returning ", current_vertex.state
     return current_vertex
     
 
@@ -111,21 +143,21 @@ def depthFirstSearch(problem):
     graph = util.Graph()
     edge_stack = util.Stack() # the next edges to visit in search
 
-    start_vertex = graph.insertVertex(problem.getStartState(), None)                # root of the DFS tree
+    start_vertex = graph.insertVertex(problem.getStartState(), None)
     food_vertex = generateDFSTree(problem, graph, edge_stack, start_vertex)
     # trace the path
     curr = food_vertex
-    path_stk = Stack()
+    path_stk = util.Stack()
     while(curr != start_vertex):
       parent_edge = curr.getParentEdge()
       path_stk.push(parent_edge.bearing)
-      curr = parent
+      curr = curr.parent
     # flip the path
     path = []
     while(not path_stk.isEmpty()):
       path.append(path_stk.pop())
+    print path
     return path
-    " GOAL: return a sequence of directions to take which is the shortest path to the food."
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):

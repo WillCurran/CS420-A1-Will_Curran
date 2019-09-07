@@ -680,9 +680,9 @@ class Vertex:
         self.edges = [] # adjacent edges
         self.visited = False
 
-    def getParentEdge():
+    def getParentEdge(self):
         for edge in self.edges:
-            if(edge.verts[0] == parent):
+            if(edge.verts[0] == self.parent):
                 return edge
 
 class Edge:
@@ -691,8 +691,21 @@ class Edge:
         self.verts = (v1, v2)
         self.bearing = bearing # bearing from v1 to v2
         self.back_edge = False
-        v1.edges.append(self)
-        v2.edges.append(self)
+
+    def oppositeTo(self, v):
+        if(self.verts[0] == v):
+            return self.verts[1]
+        return self.verts[0]
+
+    def getNonVisitedVertex(self):
+        "Return a vertex of this edge which has not yet been visited"
+        if(self.verts[0].visited and not self.verts[1].visited):
+            return self.verts[1]
+        elif(not self.verts[0].visited and self.verts[1].visited):
+            return self.verts[0]
+        else:
+            print "VERTS BOTH VISITED"
+            return -1
 
 
 class Graph:
@@ -715,9 +728,15 @@ class Graph:
         self.edges.append(new_edge)
         return new_edge
 
+    def findVertOfState(self, state):
+        for vert in self.verts:
+            if(vert.state == state):
+                return vert
+        return None
+
     def isEmpty(self):
         "Returns true if the graph is empty"
-        return self.verts.count == 0
+        return len(self.verts) == 0
 
     # def goToSibling(vertex):
     #     "Does this vertex have a sibling (tree)? If not, return None, else return sibling vertex"
