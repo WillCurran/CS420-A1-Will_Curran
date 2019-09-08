@@ -134,38 +134,43 @@ def depthFirstSearch(problem):
     graph = util.Graph()
     vert_stk = util.Stack()
     start_vertex = graph.insertVertex(problem.getStartState(), None)
-    next_vertex = start_vertex
-    vert_stk.push(next_vertex)
-
-    while(not vert_stk.isEmpty() and not problem.isGoalState(next_vertex.state)):
+    start_vertex.visited = True
+    next_vertex = None
+    vert_stk.push(start_vertex)
+  
+    while(not vert_stk.isEmpty()):
+      next_vertex = vert_stk.pop()
+      # print next_vertex.state, " was popped from the stack."
+      if(problem.isGoalState(next_vertex.state)):
+        break
       # insert newly discovered vertices and edges
       for successor in problem.getSuccessors(next_vertex.state):
         add_this_edge = True
         # search adjacency list of current vertex to ensure we haven't seen an edge with the successor
-        for edge in next_vertex.edges:
-          if(edge.oppositeTo(next_vertex).state == successor[0]): # if this edge is a duplicate, don't add
+        for vert in next_vertex.adjacent_verts:
+          if(vert.state == successor[0]): # if this edge is a duplicate, don't add
             add_this_edge = False
             continue
-        successor_vert = graph.findVertOfState(successor[0])      # copy or reference returned?
+        successor_vert = graph.findVertOfState(successor[0])      # O(n), copy or reference returned?
         # add to graph if appropriate
         if(successor_vert == None): 
           successor_vert = graph.insertVertex(successor[0], next_vertex)
         if(add_this_edge):
-          graph.insertEdge(next_vertex, successor_vert, successor[1])
+          next_vertex.adjacent_verts.append(successor_vert)
+          successor_vert.adjacent_verts.append(next_vertex)
+          # graph.insertEdge(next_vertex, successor_vert, successor[1])
 
-      next_vertex.visited = True
-      prev = next_vertex
-      next_vertex = vert_stk.pop()
-      next_vertex.parent = prev                                   # for traversal later
       for vert in next_vertex.adjacent_verts:                     # duplicate code to top, let it go for now
         if(not vert.visited):
+          # print vert.state, " was pushed to the stack --- from ", next_vertex.state
           vert.visited = True
+          vert.parent = next_vertex                               # for traversal later
           vert_stk.push(vert)
+    print "Goal = ", next_vertex.state
     # trace the path
     path_stk = util.Stack()
     while(next_vertex != start_vertex):
-      parent_edge = next_vertex.getParentEdge()
-      path_stk.push(parent_edge.bearing)
+      path_stk.push(next_vertex.getBearing())
       next_vertex = next_vertex.parent
     # flip the path
     path = []
