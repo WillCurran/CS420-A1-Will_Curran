@@ -680,6 +680,7 @@ class Vertex:
         self.edges = [] # adjacent edges
         self.adjacent_verts = [] # adjacent vertices
         self.visited = False
+        self.inCloud = False
 
     def isAdjacentTo(self, v):
         for vert in self.adjacent_verts:
@@ -700,15 +701,17 @@ class Vertex:
 
 class Edge:
     "An edge of a graph in the pac-man world"
-    def __init__(self, v1, v2, bearing):
+    def __init__(self, v1, v2, bearing, weight):
         self.verts = (v1, v2)
         self.bearing = bearing # bearing from v1 to v2
         self.back_edge = False
         self.explored = False
-        v1.edges.append(self)
-        v1.adjacent_verts.append(v2)
-        v2.edges.append(self)
-        v2.adjacent_verts.append(v1)
+        self.weight = weight
+        if(v1 != None and v2 != None):
+            v1.edges.append(self)
+            v1.adjacent_verts.append(v2)
+            v2.edges.append(self)
+            v2.adjacent_verts.append(v1)
 
     def oppositeTo(self, v):
         if(self.verts[0] == v):
@@ -728,8 +731,20 @@ class Edge:
     def containsState(self, state):
         return self.verts[0].state == state or self.verts[1].state == state
 
+    def getVertexOutsideCloud(self):
+        if(self.verts[0] == None or self.verts[0].inCloud):
+            return self.verts[1]
+        elif(self.verts[1] == None or self.verts[1].inCloud):
+            return self.verts[0]
+        else:
+            print "NO VERTS IN CLOUD YET"
+            return None
+
     def printSelf(self):
-        print "[ ", self.verts[0].state, ", ", self.verts[1].state, ", '", self.bearing, "' ]"
+        if(self.verts[0] == None):
+            print "[ None, ", self.verts[1].state, ", '", self.bearing, "' ]"
+        else:
+            print "[ ", self.verts[0].state, ", ", self.verts[1].state, ", '", self.bearing, "' ]"
 
 
 class Graph:
@@ -744,10 +759,11 @@ class Graph:
         self.verts.append(new_vert)
         return new_vert
 
-    def insertEdge(self, v1, v2, bearing):
+    def insertEdge(self, v1, v2, bearing, weight):
         "Add an edge to the graph"
-        new_edge = Edge(v1, v2, bearing)
-        self.edges.append(new_edge)
+        new_edge = Edge(v1, v2, bearing, weight)
+        if(v1 == None or v2 == None):
+            self.edges.append(new_edge)
         return new_edge
 
     def findVertOfState(self, state):
