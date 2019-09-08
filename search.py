@@ -140,7 +140,51 @@ def depthFirstSearch(problem):
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    
+    graph = util.Graph()
+    vert_queue = util.Queue()
+    start_vertex = graph.insertVertex(problem.getStartState(), None)
+    start_vertex.visited = True
+    next_vertex = None
+    vert_queue.push(start_vertex)
+  
+    while(not vert_queue.isEmpty()):
+      prev = next_vertex
+      next_vertex = vert_queue.pop()
+      # print "At ", next_vertex.state
+      # print next_vertex.state, " was popped from the stack."
+      if(problem.isGoalState(next_vertex.state)):
+        break
+      # insert newly discovered vertices and edges
+      for successor in problem.getSuccessors(next_vertex.state):
+        add_this_edge = True
+        # search adjacency list of current vertex to ensure we haven't seen an edge with the successor
+        for vert in next_vertex.adjacent_verts:
+          if(vert.state == successor[0]): # if this edge is a duplicate, don't add
+            add_this_edge = False
+            continue
+        successor_vert = graph.findVertOfState(successor[0])      # O(n), copy or reference returned?
+        # add to graph if appropriate
+        if(successor_vert == None): 
+          successor_vert = graph.insertVertex(successor[0], next_vertex) # str type bug
+        if(add_this_edge):
+          graph.insertEdge(next_vertex, successor_vert, successor[1])
+
+      for vert in next_vertex.adjacent_verts:                     # duplicate code to top, let it go for now
+        if(not vert.visited):
+          # print vert.state, " was pushed to the stack --- from ", next_vertex.state
+          vert.visited = True
+          vert.parent = next_vertex                               # for traversal later
+          vert_queue.push(vert)
+    # trace the path
+    path_stk = util.Stack()
+    while(next_vertex != start_vertex):
+      path_stk.push(next_vertex.getBearing())
+      next_vertex = next_vertex.parent
+    # flip the path
+    path = []
+    while(not path_stk.isEmpty()):
+      path.append(path_stk.pop())
+    return path
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
