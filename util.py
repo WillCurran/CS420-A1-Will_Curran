@@ -688,16 +688,17 @@ class Vertex:
 
     def getBearing(self):
         if(self.parent != None):
-            delta = (self.parent.state[0] - self.state[0], self.parent.state[1] - self.state[1])
-            print "parent: ", self.parent.state, " current: ", self.state
-            if(delta[0] == 0): # y axis translation
-                if(delta[1] > 0): # from high to low
-                    return 'South'
-                elif(delta[1] < 0):
-                    return 'North'
-            elif(delta[0] > 0):
-                return 'West'
-            return 'East'
+            return self.getParentEdge().bearing
+            # delta = (self.parent.state[0] - self.state[0], self.parent.state[1] - self.state[1])
+            # # print "parent: ", self.parent.state, " current: ", self.state
+            # if(delta[0] == 0): # y axis translation
+            #     if(delta[1] > 0): # from high to low
+            #         return 'South'
+            #     elif(delta[1] < 0):
+            #         return 'North'
+            # elif(delta[0] > 0):
+            #     return 'West'
+            # return 'East'
         print "NO BEARING SINCE NO PARENT"
         return None
 

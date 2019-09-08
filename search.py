@@ -154,11 +154,11 @@ def depthFirstSearch(problem):
         successor_vert = graph.findVertOfState(successor[0])      # O(n), copy or reference returned?
         # add to graph if appropriate
         if(successor_vert == None): 
-          successor_vert = graph.insertVertex(successor[0], next_vertex)
+          successor_vert = graph.insertVertex(successor[0], next_vertex) # str type bug
         if(add_this_edge):
-          next_vertex.adjacent_verts.append(successor_vert)
-          successor_vert.adjacent_verts.append(next_vertex)
-          # graph.insertEdge(next_vertex, successor_vert, successor[1])
+          # next_vertex.adjacent_verts.append(successor_vert)
+          # successor_vert.adjacent_verts.append(next_vertex)
+          graph.insertEdge(next_vertex, successor_vert, successor[1])
 
       for vert in next_vertex.adjacent_verts:                     # duplicate code to top, let it go for now
         if(not vert.visited):
