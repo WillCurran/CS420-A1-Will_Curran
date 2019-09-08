@@ -71,50 +71,6 @@ def tinyMazeSearch(problem):
     s = Directions.SOUTH
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
-
-def generateDFSTree(problem, graph, next_vertex):
-    """
-    Recursively called algorithm which expands a given graph along the way and
-    returns the first time food is found. Assumes food exists.
-    """
-    if(problem.isGoalState(next_vertex.state)):
-      # print "Returning goal vertex at ", next_vertex.state
-      graph.goal_vert = next_vertex
-      return
-    
-    next_vertex.visited = True
-    # insert newly discovered vertices and edges
-    for successor in problem.getSuccessors(next_vertex.state):
-      add_this_edge = True
-      # search adjacency list of current vertex to ensure we haven't seen an edge with the successor
-      for edge in next_vertex.edges:
-        if(edge.oppositeTo(next_vertex).state == successor[0]):
-          add_this_edge = False
-          continue
-      successor_vert = graph.findVertOfState(successor[0])      # copy or reference returned?
-      # add to graph if appropriate
-      if(successor_vert == None): 
-        successor_vert = graph.insertVertex(successor[0], next_vertex)
-      if(add_this_edge):
-        graph.insertEdge(next_vertex, successor_vert, successor[1])
-  
-    # for edge in next_vertex.edges:
-    #     edge.printSelf()
-    initial_vertex = next_vertex # copy in order to keep track with prints
-    for new_edge in next_vertex.edges:
-      # print "At ", initial_vertex.state
-      if(not new_edge.explored):
-        # print "Haven't explored: "
-        # new_edge.printSelf()
-        graph.markEdgeExplored(new_edge)
-        if(not new_edge.oppositeTo(initial_vertex).visited): # if the proposed new vertex has already been visited, don't go there.
-          next_vertex = new_edge.oppositeTo(initial_vertex)
-          # print "Next recurse at ", next_vertex.state
-          generateDFSTree(problem, graph, next_vertex)
-          # print "Done with recurse at ", next_vertex.state # are we sure this is the same vertex?
-        else:
-          # print "back edge"
-          new_edge.back_edge = True
     
 
 def depthFirstSearch(problem):
@@ -139,7 +95,11 @@ def depthFirstSearch(problem):
     vert_stk.push(start_vertex)
   
     while(not vert_stk.isEmpty()):
+      prev = next_vertex
       next_vertex = vert_stk.pop()
+      if(next_vertex.isAdjacentTo(prev)): # new parent if assigned incorrectly
+        next_vertex.parent = prev
+      # print "At ", next_vertex.state
       # print next_vertex.state, " was popped from the stack."
       if(problem.isGoalState(next_vertex.state)):
         break
@@ -166,7 +126,6 @@ def depthFirstSearch(problem):
           vert.visited = True
           vert.parent = next_vertex                               # for traversal later
           vert_stk.push(vert)
-    print "Goal = ", next_vertex.state
     # trace the path
     path_stk = util.Stack()
     while(next_vertex != start_vertex):
@@ -181,7 +140,7 @@ def depthFirstSearch(problem):
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
+    
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
