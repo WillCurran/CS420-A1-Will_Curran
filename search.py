@@ -132,17 +132,41 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     graph = util.Graph()
-
+    vert_stk = util.Stack()
     start_vertex = graph.insertVertex(problem.getStartState(), None)
-    generateDFSTree(problem, graph, start_vertex)
-    # graph.printSelf()
+    next_vertex = start_vertex
+    vert_stk.push(next_vertex)
+
+    while(not vert_stk.isEmpty() and not problem.isGoalState(next_vertex.state)):
+      # insert newly discovered vertices and edges
+      for successor in problem.getSuccessors(next_vertex.state):
+        add_this_edge = True
+        # search adjacency list of current vertex to ensure we haven't seen an edge with the successor
+        for edge in next_vertex.edges:
+          if(edge.oppositeTo(next_vertex).state == successor[0]): # if this edge is a duplicate, don't add
+            add_this_edge = False
+            continue
+        successor_vert = graph.findVertOfState(successor[0])      # copy or reference returned?
+        # add to graph if appropriate
+        if(successor_vert == None): 
+          successor_vert = graph.insertVertex(successor[0], next_vertex)
+        if(add_this_edge):
+          graph.insertEdge(next_vertex, successor_vert, successor[1])
+
+      next_vertex.visited = True
+      prev = next_vertex
+      next_vertex = vert_stk.pop()
+      next_vertex.parent = prev                                   # for traversal later
+      for vert in next_vertex.adjacent_verts:                     # duplicate code to top, let it go for now
+        if(not vert.visited):
+          vert.visited = True
+          vert_stk.push(vert)
     # trace the path
-    curr = graph.goal_vert
     path_stk = util.Stack()
-    while(curr != start_vertex):
-      parent_edge = curr.getParentEdge()
+    while(next_vertex != start_vertex):
+      parent_edge = next_vertex.getParentEdge()
       path_stk.push(parent_edge.bearing)
-      curr = curr.parent
+      next_vertex = next_vertex.parent
     # flip the path
     path = []
     while(not path_stk.isEmpty()):

@@ -678,6 +678,7 @@ class Vertex:
         self.state = state
         self.parent = parent # parent of the vertex (used if tree created by a search algorithm), a vertex or None
         self.edges = [] # adjacent edges
+        self.adjacent_verts = [] # adjacent vertices
         self.visited = False
 
     def getParentEdge(self):
@@ -692,6 +693,10 @@ class Edge:
         self.bearing = bearing # bearing from v1 to v2
         self.back_edge = False
         self.explored = False
+        v1.edges.append(self)
+        v1.adjacent_verts.append(v2)
+        v2.edges.append(self)
+        v2.adjacent_verts.append(v1)
 
     def oppositeTo(self, v):
         if(self.verts[0] == v):
@@ -720,7 +725,6 @@ class Graph:
     def __init__(self):
         self.verts = []
         self.edges = []
-        self.goal_vert = None
 
     def insertVertex(self, state, parent):
         "Add a vertex to the graph"
@@ -731,12 +735,6 @@ class Graph:
     def insertEdge(self, v1, v2, bearing):
         "Add an edge to the graph"
         new_edge = Edge(v1, v2, bearing)
-
-        # if(v1.state == (2, 3) or v2.state == (2, 3)):
-        #     print "Adding edge to (2, 3): ", "[", new_edge.verts[0].state, ", ", new_edge.verts[1].state, "]"
-
-        v1.edges.append(new_edge)
-        v2.edges.append(new_edge)
         self.edges.append(new_edge)
         return new_edge
 
