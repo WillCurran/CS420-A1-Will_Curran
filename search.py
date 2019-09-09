@@ -191,17 +191,17 @@ def uniformCostSearch(problem):
     start_vertex = graph.insertVertex(problem.getStartState(), None)
     start_vertex.visited = True # has the vertex been queued
     start_vertex.inCloud = True # has the vertex been dequeued
-    root_edge = graph.insertEdge(None, start_vertex, None, -1)
+    root_edge = graph.insertEdge(None, start_vertex, 0, 0)
     edge_pq.push(root_edge, root_edge.weight)
   
     while(not edge_pq.isEmpty()):
       next_edge = edge_pq.pop()
       next_vertex = next_edge.getVertexOutsideCloud()
-      # print "Edge popped:"
-      # next_edge.printSelf()
+      print "Edge popped:"
+      next_edge.printSelf()
       next_vertex.parent = next_edge.oppositeTo(next_vertex)
       next_vertex.inCloud = True
-      # print "At ", next_vertex.state
+      print "At ", next_vertex.state
       # print next_vertex.state, " was popped from the stack."
       if(problem.isGoalState(next_vertex.state)):
         break
@@ -224,11 +224,14 @@ def uniformCostSearch(problem):
 
       for edge in next_vertex.edges:                     # duplicate code to top, let it go for now
         vert = edge.oppositeTo(next_vertex)
-        if(not vert.visited or not vert.inCloud):
-          # print vert.state, " was pushed to the stack --- from ", next_vertex.state
-          vert.visited = True
-          edge_pq.push(edge, edge.weight + vert.parent.)
-        elif(vert.visited)
+        if(vert != None):
+          edge.weight += vert.getPrevWeight()
+          if(not vert.visited):
+            vert.visited = True
+            # print "weight was ", edge.weight, " + ", vert.getPrevWeight()
+            edge_pq.push(edge, edge.weight)
+            print vert.state, " was pushed to the queue --- from ", next_vertex.state, ", with weight ", edge.weight
+          elif():
     
     # trace the path
     path_stk = util.Stack()

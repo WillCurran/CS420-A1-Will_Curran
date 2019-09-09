@@ -690,14 +690,29 @@ class Vertex:
 
     def getParentEdge(self):
         for edge in self.edges:
-            if(edge.verts[0] == self.parent):
+            if(edge.verts[0] == self.parent or edge.verts[1] == self.parent):
                 return edge
+        return None
 
     def getBearing(self):
         if(self.parent != None):
             return self.getParentEdge().bearing
         print "NO BEARING SINCE NO PARENT"
         return None
+
+    def getPrevWeight(self):
+        if(self.parent != None):
+            # print "Parent = ", self.parent.state
+            parent_edge_of_parent = self.parent.getParentEdge()
+            # print "Parent edge of parent"
+            # parent_edge_of_parent.printSelf()
+            if(parent_edge_of_parent != None):
+                # print "Parent edge of ", self.state, "'s parent is of weight ", parent_edge_of_parent.weight
+                return parent_edge_of_parent.weight
+        else:
+            # print "Returning 0"
+            return 0
+
 
 class Edge:
     "An edge of a graph in the pac-man world"
@@ -707,11 +722,14 @@ class Edge:
         self.back_edge = False
         self.explored = False
         self.weight = weight
-        if(v1 != None and v2 != None):
+        if(v1 != None):
             v1.edges.append(self)
-            v1.adjacent_verts.append(v2)
+            if(v2 != None):
+                v1.adjacent_verts.append(v2)
+        if(v2 != None):
             v2.edges.append(self)
-            v2.adjacent_verts.append(v1)
+            if(v1 != None):
+                v2.adjacent_verts.append(v1)
 
     def oppositeTo(self, v):
         if(self.verts[0] == v):
@@ -742,9 +760,9 @@ class Edge:
 
     def printSelf(self):
         if(self.verts[0] == None):
-            print "[ None, ", self.verts[1].state, ", '", self.bearing, "' ]"
+            print "[ None, ", self.verts[1].state, ", '", self.bearing, ", '", self.weight, "' ]"
         else:
-            print "[ ", self.verts[0].state, ", ", self.verts[1].state, ", '", self.bearing, "' ]"
+            print "[ ", self.verts[0].state, ", ", self.verts[1].state, ", '", self.bearing, ", '", self.weight, "' ]"
 
 
 class Graph:
@@ -762,8 +780,8 @@ class Graph:
     def insertEdge(self, v1, v2, bearing, weight):
         "Add an edge to the graph"
         new_edge = Edge(v1, v2, bearing, weight)
-        if(v1 == None or v2 == None):
-            self.edges.append(new_edge)
+        # if(v1 == None or v2 == None):
+        self.edges.append(new_edge)
         return new_edge
 
     def findVertOfState(self, state):
