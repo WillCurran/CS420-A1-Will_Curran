@@ -191,6 +191,7 @@ def uniformCostSearch(problem):
     start_vertex = graph.insertVertex(problem.getStartState(), None)
     start_vertex.visited = True # has the vertex been queued
     start_vertex.inCloud = True # has the vertex been dequeued
+    start_vertex.minWeightToThisVert = 0
     root_edge = graph.insertEdge(None, start_vertex, 0, 0)
     edge_pq.push(root_edge, root_edge.weight)
   
@@ -201,7 +202,7 @@ def uniformCostSearch(problem):
       # next_edge.printSelf()
       next_vertex.parent = next_edge.oppositeTo(next_vertex)
       next_vertex.inCloud = True
-      # print "At ", next_vertex.state
+      print "At ", next_vertex.state
       # print next_vertex.state, " was popped from the queue."
       if(problem.isGoalState(next_vertex.state)):
         break
@@ -231,11 +232,13 @@ def uniformCostSearch(problem):
             # print "weight = ", edge.weight, " + ", vert.getPrevWeight()
             vert.minWeightToThisVert = edge.weight
             edge_pq.push(edge, edge.weight)
-            # print vert.state, " was pushed to the queue --- from ", next_vertex.state
+            print vert.state, " was pushed to the queue"
           elif(edge.weight < vert.minWeightToThisVert):
+            print "Min weight was ", vert.minWeightToThisVert, ", Now ", edge.weight
             vert.minWeightToThisVert = edge.weight
+            vert.parent = next_vertex
             edge_pq.push(edge, edge.weight)
-            # print vert.state, " was pushed to the queue --- from ", next_vertex.state, ", with weight ", edge.weight
+            print vert.state, " was pushed to the queue ----"
     
     # trace the path
     path_stk = util.Stack()
