@@ -221,7 +221,7 @@ def uniformCostSearch(problem):
         if(add_this_edge):
           e = graph.insertEdge(next_vertex, successor_vert, successor[1], successor[2])
           # print "Added Edge to graph:"
-          e.printSelf()
+          # e.printSelf()
 
       for edge in next_vertex.edges:                     # duplicate code to top, let it go for now
         vert = edge.oppositeTo(next_vertex)
@@ -262,7 +262,76 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
+    graph = util.Graph()
+    edge_pq = util.PriorityQueue()
+    start_vertex = graph.insertVertex(problem.getStartState(), None)
+    start_vertex.visited = True # has the vertex been queued
+    start_vertex.inCloud = True # has the vertex been dequeued
+    start_vertex.minWeightToThisVert = 0
+    root_edge = graph.insertEdge(None, start_vertex, 0, 0)
+    edge_pq.push(root_edge, root_edge.weight)
+  
+    while(not edge_pq.isEmpty()):
+      next_edge = edge_pq.pop()
+      next_vertex = next_edge.getVertexOutsideCloud()
+      # print "Edge popped:"
+      # next_edge.printSelf()
+      # if(next_edge.oppositeTo(next_vertex) != None):
+      #   print "Assigning ", next_vertex.state, " parent, ", next_edge.oppositeTo(next_vertex).state
+      next_vertex.parent = next_edge.oppositeTo(next_vertex)
+      next_vertex.inCloud = True
+      print "At ", next_vertex.state
+      # print next_vertex.state, " was popped from the queue."
+      if(problem.isGoalState(next_vertex.state)):
+        break
+      # insert newly discovered vertices and edges
+      for successor in problem.getSuccessors(next_vertex.state):
+        add_this_edge = True
+        # search adjacency list of current vertex to ensure we haven't seen an edge with the successor
+        for vert in next_vertex.adjacent_verts:
+          if(vert.state == successor[0]): # if this edge is a duplicate, don't add
+            add_this_edge = False
+            continue
+        successor_vert = graph.findVertOfState(successor[0])      # O(n), copy or reference returned?
+        # add to graph if appropriate
+        if(successor_vert == None): 
+          successor_vert = graph.insertVertex(successor[0], next_vertex)
+        if(add_this_edge):
+          e = graph.insertEdge(next_vertex, successor_vert, successor[1], successor[2])
+          # print "Added Edge to graph:"
+          # e.printSelf()
+
+      for edge in next_vertex.edges:                     # duplicate code to top, let it go for now
+        vert = edge.oppositeTo(next_vertex)
+        if(vert != None):
+          prev_accumulated_weight = vert.getPrevWeight()
+          if(vert.parent != None):
+            print "weight to ", vert.parent.state, " is ", prev_accumulated_weight
+          if(not vert.visited):
+            vert.visited = True
+            edge.weight += prev_accumulated_weight
+            vert.minWeightToThisVert = edge.weight
+            edge_pq.push(edge, edge.weight + heuristic(vert.state, problem))
+            # print vert.state, " was pushed to the queue with weight = ", edge.weight
+          elif(edge.weight + prev_accumulated_weight < vert.minWeightToThisVert): # heuristic is canceled out since this case is given that heuristic is same since state is same
+            edge.weight += prev_accumulated_weight
+            print "Min weight to ", vert.state, " was ", vert.minWeightToThisVert, ", Now ", edge.weight
+            vert.minWeightToThisVert = edge.weight
+            print "Assigning ", vert.state, " parent, ", next_vertex.state
+            vert.parent = next_vertex
+            edge_pq.push(edge, edge.weight + heuristic(vert.state, problem))
+            # print vert.state, " was pushed to the queue ----"
+    
+    # trace the path
+    path_stk = util.Stack()
+    while(next_vertex != start_vertex):
+      path_stk.push(next_vertex.getBearing())
+      next_vertex = next_vertex.parent
+    # flip the path
+    path = []
+    while(not path_stk.isEmpty()):
+      path.append(path_stk.pop())
+    return path
     util.raiseNotDefined()
 
 
