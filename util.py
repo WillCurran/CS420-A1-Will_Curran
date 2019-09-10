@@ -702,17 +702,11 @@ class Vertex:
         return None
 
     def getPrevWeight(self):
-        
+        "return the weight along parent edge"
         if(self.parent != None):
-            # print "Parent = ", self.parent.state
-            parent_edge_of_parent = self.parent.getParentEdge()
-            print "Parent edge of ", self.state, "'s parent - ", self.parent.state, " - is of weight ", parent_edge_of_parent.weight
-            # print "Parent edge of parent"
-            # parent_edge_of_parent.printSelf()
-            if(parent_edge_of_parent != None):
-                # print "Parent edge of ", self.state, "'s parent is of weight ", parent_edge_of_parent.weight
-                return parent_edge_of_parent.weight
-        # print "Returning 0"
+            parent_edge = self.getParentEdge()
+            if(parent_edge != None):
+                return parent_edge.weight
         return 0
 
 

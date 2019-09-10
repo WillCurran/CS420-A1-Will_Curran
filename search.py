@@ -226,7 +226,7 @@ def uniformCostSearch(problem):
       for edge in next_vertex.edges:                     # duplicate code to top, let it go for now
         vert = edge.oppositeTo(next_vertex)
         if(vert != None):
-          prev_accumulated_weight = vert.getPrevWeight()
+          prev_accumulated_weight = next_vertex.getPrevWeight()
           if(not vert.visited):
             vert.visited = True
             edge.weight += prev_accumulated_weight
@@ -304,7 +304,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
       for edge in next_vertex.edges:                     # duplicate code to top, let it go for now
         vert = edge.oppositeTo(next_vertex)
         if(vert != None):
-          prev_accumulated_weight = vert.getPrevWeight()
+          prev_accumulated_weight = next_vertex.getPrevWeight()
           if(vert.parent != None):
             print "weight from ", vert.state, "to ", vert.parent.state, " is ", prev_accumulated_weight
           if(not vert.visited):
