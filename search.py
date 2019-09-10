@@ -202,7 +202,7 @@ def uniformCostSearch(problem):
       # next_edge.printSelf()
       next_vertex.parent = next_edge.oppositeTo(next_vertex)
       next_vertex.inCloud = True
-      print "At ", next_vertex.state
+      # print "At ", next_vertex.state
       # print next_vertex.state, " was popped from the queue."
       if(problem.isGoalState(next_vertex.state)):
         break
@@ -221,24 +221,25 @@ def uniformCostSearch(problem):
         if(add_this_edge):
           e = graph.insertEdge(next_vertex, successor_vert, successor[1], successor[2])
           # print "Added Edge to graph:"
-          # e.printSelf()
+          e.printSelf()
 
       for edge in next_vertex.edges:                     # duplicate code to top, let it go for now
         vert = edge.oppositeTo(next_vertex)
         if(vert != None):
-          edge.weight += vert.getPrevWeight()
+          prev_accumulated_weight = vert.getPrevWeight()
           if(not vert.visited):
             vert.visited = True
-            # print "weight = ", edge.weight, " + ", vert.getPrevWeight()
+            edge.weight += prev_accumulated_weight
             vert.minWeightToThisVert = edge.weight
             edge_pq.push(edge, edge.weight)
-            print vert.state, " was pushed to the queue"
-          elif(edge.weight < vert.minWeightToThisVert):
-            print "Min weight was ", vert.minWeightToThisVert, ", Now ", edge.weight
+            # print vert.state, " was pushed to the queue with weight = ", edge.weight
+          elif(edge.weight + prev_accumulated_weight < vert.minWeightToThisVert):
+            # print "Min weight was ", vert.minWeightToThisVert, ", Now ", edge.weight
+            edge.weight += prev_accumulated_weight
             vert.minWeightToThisVert = edge.weight
             vert.parent = next_vertex
             edge_pq.push(edge, edge.weight)
-            print vert.state, " was pushed to the queue ----"
+            # print vert.state, " was pushed to the queue ----"
     
     # trace the path
     path_stk = util.Stack()
