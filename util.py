@@ -681,6 +681,7 @@ class Vertex:
         self.adjacent_verts = [] # adjacent vertices
         self.visited = False
         self.inCloud = False
+        self.minWeightToThisVert = sys.maxint
 
     def isAdjacentTo(self, v):
         for vert in self.adjacent_verts:
@@ -709,9 +710,8 @@ class Vertex:
             if(parent_edge_of_parent != None):
                 # print "Parent edge of ", self.state, "'s parent is of weight ", parent_edge_of_parent.weight
                 return parent_edge_of_parent.weight
-        else:
-            # print "Returning 0"
-            return 0
+        # print "Returning 0"
+        return 0
 
 
 class Edge:

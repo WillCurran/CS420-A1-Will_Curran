@@ -197,12 +197,12 @@ def uniformCostSearch(problem):
     while(not edge_pq.isEmpty()):
       next_edge = edge_pq.pop()
       next_vertex = next_edge.getVertexOutsideCloud()
-      print "Edge popped:"
-      next_edge.printSelf()
+      # print "Edge popped:"
+      # next_edge.printSelf()
       next_vertex.parent = next_edge.oppositeTo(next_vertex)
       next_vertex.inCloud = True
-      print "At ", next_vertex.state
-      # print next_vertex.state, " was popped from the stack."
+      # print "At ", next_vertex.state
+      # print next_vertex.state, " was popped from the queue."
       if(problem.isGoalState(next_vertex.state)):
         break
       # insert newly discovered vertices and edges
@@ -228,10 +228,14 @@ def uniformCostSearch(problem):
           edge.weight += vert.getPrevWeight()
           if(not vert.visited):
             vert.visited = True
-            # print "weight was ", edge.weight, " + ", vert.getPrevWeight()
+            # print "weight = ", edge.weight, " + ", vert.getPrevWeight()
+            vert.minWeightToThisVert = edge.weight
             edge_pq.push(edge, edge.weight)
-            print vert.state, " was pushed to the queue --- from ", next_vertex.state, ", with weight ", edge.weight
-          elif():
+            # print vert.state, " was pushed to the queue --- from ", next_vertex.state
+          elif(edge.weight < vert.minWeightToThisVert):
+            vert.minWeightToThisVert = edge.weight
+            edge_pq.push(edge, edge.weight)
+            # print vert.state, " was pushed to the queue --- from ", next_vertex.state, ", with weight ", edge.weight
     
     # trace the path
     path_stk = util.Stack()
