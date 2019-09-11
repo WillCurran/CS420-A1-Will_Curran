@@ -493,12 +493,23 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
+    # total number of food left, plus dist closest one
+    # divide into food clusters? then distances added from centers of clusters
+    # current quadrant food count divided 
     position, foodGrid = state
+    # min_dist = sys.maxint
     food_num = 0
-    for entry in foodGrid.asList():
-        if(entry):
-            food_num += 1
-    return food_num
+    for i in range(foodGrid.width):
+        for j in range(foodGrid.height):
+            if(foodGrid[i][j]):
+                food_num += 1
+                # d = util.manhattanDistance(position, (i, j))
+                # if(d < min_dist):
+                #     min_dist = d
+    # for entry in foodGrid.asList():
+    #     if(entry):
+    #         food_num += 1
+    return food_num # + min_dist
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
