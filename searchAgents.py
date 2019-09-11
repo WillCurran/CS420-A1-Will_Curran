@@ -34,6 +34,7 @@ description for details.
 Good luck and happy searching!
 """
 
+import sys
 from game import Directions
 from game import Agent
 from game import Actions
@@ -290,12 +291,11 @@ class CornersProblem(search.SearchProblem):
         self.start = (self.startingPosition, (self.isPositionACorner(self.startingPosition, 0), 
                                               self.isPositionACorner(self.startingPosition, 1), 
                                               self.isPositionACorner(self.startingPosition, 2),
-                                              self.isPositionACorner(self.startingPosition, 3)),
-                                              self.corners)
+                                              self.isPositionACorner(self.startingPosition, 3)))
 
     def isPositionACorner(self, pos, whichCorner):
         assert(whichCorner >= 0 and whichCorner < 4)
-        return pos[whichCorner][0] == self.corners[whichCorner][0] and pos[whichCorner][1] == self.corners[whichCorner][1]
+        return pos[0] == self.corners[whichCorner][0] and pos[1] == self.corners[whichCorner][1]
 
     def getStartState(self):
         """
@@ -329,15 +329,20 @@ class CornersProblem(search.SearchProblem):
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
-            # Here's a code snippet for figuring out whether a new position hits a wall:
-            #   x,y = currentPosition
-            #   dx, dy = Actions.directionToVector(action)
-            #   nextx, nexty = int(x + dx), int(y + dy)
-            #   hitsWall = self.walls[nextx][nexty]
-            
             # go to a new coordinate, check if a corner has been reached and set it to True if so
-            "*** YOUR CODE HERE ***"
-
+            x,y = state[0]
+            cornersReached = state[1]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty]:
+                # evaluate if this position is a corner only if that corner hasn't been reached yet
+                successors.append((((nextx, nexty), 
+                                    (cornersReached[0] or self.isPositionACorner((nextx, nexty), 0), 
+                                     cornersReached[1] or self.isPositionACorner((nextx, nexty), 1), 
+                                     cornersReached[2] or self.isPositionACorner((nextx, nexty), 2),
+                                     cornersReached[3] or self.isPositionACorner((nextx, nexty), 3))),
+                                   action, 
+                                   1))
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
@@ -370,9 +375,33 @@ def cornersHeuristic(state, problem):
     """
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
-
-    "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    valid_corners = []
+    current_pos = state[0]
+    current_to_corner = []
+    # get corners not visited yet (maintain order)
+    for i in range(4):
+        if(not state[1][i]):
+            valid_corners.append(corners[i])
+            current_to_corner.append(sys.maxint)
+    
+    # for each leg in the journey - (A --> C0 --> C1 --> C2 --> C3), get min manhattan dist
+    for i in range(len(valid_corners)):
+        if(len(valid_corners) == 0): # we will be removing from valid_corners
+            break
+        which_corner_is_min = -1
+        j = 0
+        #check the distance to all valid corners and find minimum for this leg
+        for corner in valid_corners:
+            dist = util.manhattanDistance(current_pos, corner)
+            if(dist < current_to_corner[i]):
+                current_to_corner[i] = dist
+                which_corner_is_min = j
+            j += 1
+        current_pos = valid_corners[which_corner_is_min]
+        valid_corners.remove(valid_corners[which_corner_is_min]) # remove the corner which we theoretically just went to
+    if(len(current_to_corner) > 0):
+        return sum(current_to_corner) # returns shortest manhattan distance chain beginning at initial state and reaching corners
+    return 0
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"

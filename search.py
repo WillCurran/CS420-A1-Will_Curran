@@ -280,7 +280,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
       #   print "Assigning ", next_vertex.state, " parent, ", next_edge.oppositeTo(next_vertex).state
       next_vertex.parent = next_edge.oppositeTo(next_vertex)
       next_vertex.inCloud = True
-      print "At ", next_vertex.state
+      # print "At ", next_vertex.state
       # print next_vertex.state, " was popped from the queue."
       if(problem.isGoalState(next_vertex.state)):
         break
@@ -298,15 +298,15 @@ def aStarSearch(problem, heuristic=nullHeuristic):
           successor_vert = graph.insertVertex(successor[0], next_vertex)
         if(add_this_edge):
           e = graph.insertEdge(next_vertex, successor_vert, successor[1], successor[2])
-          print "Added Edge to graph:"
-          e.printSelf()
+          # print "Added Edge to graph:"
+          # e.printSelf()
 
       for edge in next_vertex.edges:                     # duplicate code to top, let it go for now
         vert = edge.oppositeTo(next_vertex)
         if(vert != None):
           prev_accumulated_weight = next_vertex.getPrevWeight()
-          if(vert.parent != None):
-            print "weight from ", vert.state, "to ", vert.parent.state, " is ", prev_accumulated_weight
+          # if(vert.parent != None):
+            # print "weight from ", vert.state, "to ", vert.parent.state, " is ", prev_accumulated_weight
           if(not vert.visited):
             vert.visited = True
             edge.weight += prev_accumulated_weight
@@ -316,10 +316,10 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             # print vert.state, " was pushed to the queue with weight = ", edge.weight
           elif(edge.weight + prev_accumulated_weight < vert.minWeightToThisVert): # heuristic is canceled out since this case is given that heuristic is same since state is same
             edge.weight += prev_accumulated_weight
-            print "Min weight to ", vert.state, " was ", vert.minWeightToThisVert, ", Now ", edge.weight, " from Edge: "
+            # print "Min weight to ", vert.state, " was ", vert.minWeightToThisVert, ", Now ", edge.weight, " from Edge: "
             edge.printSelf()
             vert.minWeightToThisVert = edge.weight
-            print "Assigning ", vert.state, " parent, ", next_vertex.state
+            # print "Assigning ", vert.state, " parent, ", next_vertex.state
             vert.parent = next_vertex
             edge_pq.push(edge, edge.weight + heuristic(vert.state, problem))
             # print vert.state, " was pushed to the queue ----"
