@@ -295,7 +295,7 @@ class CornersProblem(search.SearchProblem):
 
     def isPositionACorner(self, pos, whichCorner):
         assert(whichCorner >= 0 and whichCorner < 4)
-        return pos[0] == self.corners[whichCorner][0] and pos[1] == self.corners[whichCorner][1]
+        return pos[0] == self.corners[whichCorner][0] and pos[1] == self.corners[whichCorner][1] # assumptions on what "position" means
 
     def getStartState(self):
         """
@@ -309,7 +309,7 @@ class CornersProblem(search.SearchProblem):
         """
         Returns whether this search state is a goal state of the problem.
         """
-        for b in self.start[1]:
+        for b in state[1]:
             if(not b):
                 return False
         return True # all corners reached
@@ -424,6 +424,7 @@ class FoodSearchProblem:
         self.startingGameState = startingGameState
         self._expanded = 0 # DO NOT CHANGE
         self.heuristicInfo = {} # A dictionary for the heuristic to store information
+        self.gameState = startingGameState
 
     def getStartState(self):
         return self.start
@@ -496,20 +497,48 @@ def foodHeuristic(state, problem):
     # total number of food left, plus dist closest one
     # divide into food clusters? then distances added from centers of clusters
     # current quadrant food count divided 
+
+    
+    # do the following once and store it in the dictionary:
+    # until no more food
+    #   find nearest neighbor food from current spot
+    #   append current coordinate, plus the mazeDistance to get to the food.
+    #   remove food from the copy of foodGrid, update current = food just calculated
+    # if position is occupied by food in foodGrid, update it and remove its corresponding element from the list
+    # return the sum of the weights along the list
+
     position, foodGrid = state
+    if(problem.heuristicInfo['food_neighbors'] == None): # first time called
+        food_neighbors = []
+        current_pos = position
+        food_list = foodGrid.asList() # a list of positions where food exists
+        while(len(food_list) > 0):
+            
+        for i in range(foodGrid.width):
+            for j in range(foodGrid.height):
+                if(foodGrid[i][j]):
+                    food_neighbors.append((i, j), mazeDistance(position, (i, j), problem.gameState)
+        problem.heuristicInfo['food_neighbors'] = food_neighbors
+        problem.heuristicInfo['initial_foodGrid'] = foodGrid.copy()
+    
+    if(problem.heuristicInfo['initial_foodGrid'][position[0]][position[1]]):
+        for food in problem.heuristicInfo['food_neighbors']:
+            if(food[0][0] == position[0] and food[0][1] == position[1]):
+                problem.heuristicInfo['food_neighbors'].remove(food)
+    
     # min_dist = sys.maxint
-    food_num = 0
-    for i in range(foodGrid.width):
-        for j in range(foodGrid.height):
-            if(foodGrid[i][j]):
-                food_num += 1
-                # d = util.manhattanDistance(position, (i, j))
-                # if(d < min_dist):
-                #     min_dist = d
-    # for entry in foodGrid.asList():
-    #     if(entry):
-    #         food_num += 1
-    return food_num # + min_dist
+    # food_num = 0
+    # for i in range(foodGrid.width):
+    #     for j in range(foodGrid.height):
+    #         if(foodGrid[i][j]):
+    #             food_num += 1
+    #             # print "Dist to this food: ", mazeDistance(position, (i, j), game_state)
+    #             d = mazeDistance(position, (i, j), game_state)
+    #             if(d < min_dist):
+    #                 min_dist = d
+    # if(food_num == 0):
+    #     return 0
+    # return food_num + min_dist - 1
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -534,9 +563,9 @@ class ClosestDotSearchAgent(SearchAgent):
         gameState.
         """
         # Here are some useful elements of the startState
-        startPosition = gameState.getPacmanPosition()
-        food = gameState.getFood()
-        walls = gameState.getWalls()
+        # startPosition = gameState.getPacmanPosition()
+        # food = gameState.getFood()
+        # walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
 
         return search.bfs(problem)

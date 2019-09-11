@@ -317,7 +317,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
           elif(edge.weight + prev_accumulated_weight < vert.minWeightToThisVert): # heuristic is canceled out since this case is given that heuristic is same since state is same
             edge.weight += prev_accumulated_weight
             # print "Min weight to ", vert.state, " was ", vert.minWeightToThisVert, ", Now ", edge.weight, " from Edge: "
-            edge.printSelf()
+            # edge.printSelf()
             vert.minWeightToThisVert = edge.weight
             # print "Assigning ", vert.state, " parent, ", next_vertex.state
             vert.parent = next_vertex
