@@ -508,37 +508,39 @@ def foodHeuristic(state, problem):
     # return the sum of the weights along the list
 
     position, foodGrid = state
-    if(problem.heuristicInfo['food_neighbors'] == None): # first time called
-        food_neighbors = []
-        current_pos = position
-        food_list = foodGrid.asList() # a list of positions where food exists
-        while(len(food_list) > 0):
-            
-        for i in range(foodGrid.width):
-            for j in range(foodGrid.height):
-                if(foodGrid[i][j]):
-                    food_neighbors.append((i, j), mazeDistance(position, (i, j), problem.gameState)
-        problem.heuristicInfo['food_neighbors'] = food_neighbors
-        problem.heuristicInfo['initial_foodGrid'] = foodGrid.copy()
+    # if(problem.heuristicInfo['food_neighbors'] == None): # first time called
+    #     food_neighbors = []
+    #     current_pos = position
+    #     food_list = foodGrid.asList() # a list of positions where food exists
+    #     while(len(food_list) > 0):
+
+    #     for i in range(foodGrid.width):
+    #         for j in range(foodGrid.height):
+    #             if(foodGrid[i][j]):
+    #                 food_neighbors.append((i, j), mazeDistance(position, (i, j), problem.gameState)
+    #     problem.heuristicInfo['food_neighbors'] = food_neighbors
+    #     problem.heuristicInfo['initial_foodGrid'] = foodGrid.copy()
     
-    if(problem.heuristicInfo['initial_foodGrid'][position[0]][position[1]]):
-        for food in problem.heuristicInfo['food_neighbors']:
-            if(food[0][0] == position[0] and food[0][1] == position[1]):
-                problem.heuristicInfo['food_neighbors'].remove(food)
+    # if(problem.heuristicInfo['initial_foodGrid'][position[0]][position[1]]):
+    #     for food in problem.heuristicInfo['food_neighbors']:
+    #         if(food[0][0] == position[0] and food[0][1] == position[1]):
+    #             problem.heuristicInfo['food_neighbors'].remove(food)
     
     # min_dist = sys.maxint
+    max_dist_to_food = 0
     # food_num = 0
-    # for i in range(foodGrid.width):
-    #     for j in range(foodGrid.height):
-    #         if(foodGrid[i][j]):
-    #             food_num += 1
-    #             # print "Dist to this food: ", mazeDistance(position, (i, j), game_state)
-    #             d = mazeDistance(position, (i, j), game_state)
-    #             if(d < min_dist):
-    #                 min_dist = d
+    for i in range(foodGrid.width):
+        for j in range(foodGrid.height):
+            if(foodGrid[i][j]):
+                # food_num += 1
+                # print "Dist to this food: ", mazeDistance(position, (i, j), game_state)
+                d = util.manhattanDistance(position, (i, j))
+                if(d > max_dist_to_food):
+                    max_dist_to_food = d
     # if(food_num == 0):
     #     return 0
     # return food_num + min_dist - 1
+    return max_dist_to_food
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
