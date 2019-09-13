@@ -286,8 +286,7 @@ class CornersProblem(search.SearchProblem):
             if not startingGameState.hasFood(*corner):
                 print 'Warning: no food in corner ' + str(corner)
         self._expanded = 0 # DO NOT CHANGE; Number of search nodes expanded
-        # Please add any code here which you would like to use
-        # in initializing the problem
+        # Check if any corners are the initial position
         self.start = (self.startingPosition, (self.isPositionACorner(self.startingPosition, 0), 
                                               self.isPositionACorner(self.startingPosition, 1), 
                                               self.isPositionACorner(self.startingPosition, 2),
@@ -309,6 +308,7 @@ class CornersProblem(search.SearchProblem):
         """
         Returns whether this search state is a goal state of the problem.
         """
+        # if any corner has not yet been reached return False
         for b in state[1]:
             if(not b):
                 return False
@@ -329,7 +329,7 @@ class CornersProblem(search.SearchProblem):
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
-            # go to a new coordinate, check if a corner has been reached and set it to True if so
+            # consider a new action, check if a corner has been reached from this action and set it to True if so
             x,y = state[0]
             cornersReached = state[1]
             dx, dy = Actions.directionToVector(action)
@@ -390,7 +390,7 @@ def cornersHeuristic(state, problem):
             break
         which_corner_is_min = -1
         j = 0
-        #check the distance to all valid corners and find minimum for this leg
+        # check the distance to all valid corners and find minimum for this leg
         for corner in valid_corners:
             dist = util.manhattanDistance(current_pos, corner)
             if(dist < current_to_corner[i]):
@@ -398,7 +398,7 @@ def cornersHeuristic(state, problem):
                 which_corner_is_min = j
             j += 1
         current_pos = valid_corners[which_corner_is_min]
-        valid_corners.remove(valid_corners[which_corner_is_min]) # remove the corner which we theoretically just went to
+        valid_corners.remove(valid_corners[which_corner_is_min]) # remove the corner which we just "visited"
     if(len(current_to_corner) > 0):
         return sum(current_to_corner) # returns shortest manhattan distance chain beginning at initial state and reaching corners
     return 0
@@ -494,52 +494,16 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    # total number of food left, plus dist closest one
-    # divide into food clusters? then distances added from centers of clusters
-    # current quadrant food count divided 
-
-    
-    # do the following once and store it in the dictionary:
-    # until no more food
-    #   find nearest neighbor food from current spot
-    #   append current coordinate, plus the mazeDistance to get to the food.
-    #   remove food from the copy of foodGrid, update current = food just calculated
-    # if position is occupied by food in foodGrid, update it and remove its corresponding element from the list
-    # return the sum of the weights along the list
+    # get the maximum actual (maze) distance to a piece of food
 
     position, foodGrid = state
-    # if(problem.heuristicInfo['food_neighbors'] == None): # first time called
-    #     food_neighbors = []
-    #     current_pos = position
-    #     food_list = foodGrid.asList() # a list of positions where food exists
-    #     while(len(food_list) > 0):
-
-    #     for i in range(foodGrid.width):
-    #         for j in range(foodGrid.height):
-    #             if(foodGrid[i][j]):
-    #                 food_neighbors.append((i, j), mazeDistance(position, (i, j), problem.gameState)
-    #     problem.heuristicInfo['food_neighbors'] = food_neighbors
-    #     problem.heuristicInfo['initial_foodGrid'] = foodGrid.copy()
-    
-    # if(problem.heuristicInfo['initial_foodGrid'][position[0]][position[1]]):
-    #     for food in problem.heuristicInfo['food_neighbors']:
-    #         if(food[0][0] == position[0] and food[0][1] == position[1]):
-    #             problem.heuristicInfo['food_neighbors'].remove(food)
-    
-    # min_dist = sys.maxint
     max_dist_to_food = 0
-    # food_num = 0
     for i in range(foodGrid.width):
         for j in range(foodGrid.height):
             if(foodGrid[i][j]):
-                # food_num += 1
-                # print "Dist to this food: ", mazeDistance(position, (i, j), game_state)
-                d = util.manhattanDistance(position, (i, j))
+                d = mazeDistance(position, (i, j), problem.gameState)
                 if(d > max_dist_to_food):
                     max_dist_to_food = d
-    # if(food_num == 0):
-    #     return 0
-    # return food_num + min_dist - 1
     return max_dist_to_food
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -548,7 +512,7 @@ class ClosestDotSearchAgent(SearchAgent):
         self.actions = []
         currentState = state
         while(currentState.getFood().count() > 0):
-            nextPathSegment = self.findPathToClosestDot(currentState) # The missing piece
+            nextPathSegment = self.findPathToClosestDot(currentState)
             self.actions += nextPathSegment
             for action in nextPathSegment:
                 legal = currentState.getLegalActions()
@@ -564,12 +528,7 @@ class ClosestDotSearchAgent(SearchAgent):
         Returns a path (a list of actions) to the closest dot, starting from
         gameState.
         """
-        # Here are some useful elements of the startState
-        # startPosition = gameState.getPacmanPosition()
-        # food = gameState.getFood()
-        # walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
-
         return search.bfs(problem)
         util.raiseNotDefined()
 
