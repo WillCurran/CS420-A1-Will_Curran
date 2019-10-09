@@ -675,13 +675,13 @@ def unmutePrint():
 class Vertex:
     "A vertex of a graph in the pac-man world"
     def __init__(self, state, parent):
-        self.state = state
+        self.state = state # position in (x, y) format
         self.parent = parent # parent of the vertex (used if tree created by a search algorithm), a vertex or None
         self.edges = [] # adjacent edges
         self.adjacent_verts = [] # adjacent vertices
-        self.visited = False
-        self.inCloud = False
-        self.minWeightToThisVert = sys.maxint
+        self.visited = False # used to mark whether a vertex has been "seen" by a search algorithm
+        self.inCloud = False # used to show if a vert has been dequeued from UCS/A*
+        self.minWeightToThisVert = sys.maxint # used 
 
     def isAdjacentTo(self, v):
         for vert in self.adjacent_verts:
@@ -713,11 +713,9 @@ class Vertex:
 class Edge:
     "An edge of a graph in the pac-man world"
     def __init__(self, v1, v2, bearing, weight):
-        self.verts = (v1, v2)
+        self.verts = (v1, v2) # which vertices does this edge span
         self.bearing = bearing # bearing from v1 to v2
-        self.back_edge = False
-        self.explored = False
-        self.weight = weight
+        self.weight = weight # the cost to travel along this edge
         if(v1 != None):
             v1.edges.append(self)
             if(v2 != None):
@@ -728,24 +726,17 @@ class Edge:
                 v2.adjacent_verts.append(v1)
 
     def oppositeTo(self, v):
+        "Opposite vertex"
         if(self.verts[0] == v):
             return self.verts[1]
         return self.verts[0]
 
-    def getNonVisitedVertex(self):
-        "Return a vertex of this edge which has not yet been visited"
-        if(self.verts[0].visited and not self.verts[1].visited):
-            return self.verts[1]
-        elif(not self.verts[0].visited and self.verts[1].visited):
-            return self.verts[0]
-        else:
-            print "VERTS BOTH VISITED"
-            return -1
-
     def containsState(self, state):
+        "does this edge contain this state?"
         return self.verts[0].state == state or self.verts[1].state == state
 
     def getVertexOutsideCloud(self):
+        "Get the vertex outside the cloud"
         if(self.verts[0] == None or self.verts[0].inCloud):
             return self.verts[1]
         elif(self.verts[1] == None or self.verts[1].inCloud):
@@ -755,6 +746,7 @@ class Edge:
             return None
 
     def printSelf(self):
+        "utility function"
         if(self.verts[0] == None):
             print "[ None, ", self.verts[1].state, ", ", self.bearing, ", '", self.weight, "' ]"
         else:
@@ -781,30 +773,18 @@ class Graph:
         return new_edge
 
     def findVertOfState(self, state):
+        "return the vertex with the given state"
         for vert in self.verts:
             if(vert.state == state):
                 return vert
         return None
-
-    def markEdgeExplored(self, e):
-        "Mark copies of this edge explored in its vertex lists (but not the graph's) lists"
-        e.explored = True
-        # find the edge in each vertex's list and mark explored
-        for edge in e.verts[0].edges:
-            if(edge == e):
-                edge.explored = True
-                continue
-        for edge in e.verts[1].edges:
-            if(edge == e):
-                edge.explored = True
-                continue
 
     def isEmpty(self):
         "Returns true if the graph is empty"
         return len(self.verts) == 0
 
     def printSelf(self):
-        "Print the graph's state"
+        "utility function"
         print "Vertices: "
         for vert in self.verts:
             print vert.state

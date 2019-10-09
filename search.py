@@ -97,10 +97,8 @@ def depthFirstSearch(problem):
     while(not vert_stk.isEmpty()):
       prev = next_vertex
       next_vertex = vert_stk.pop()
-      if(next_vertex.isAdjacentTo(prev)): # new parent if assigned incorrectly
+      if(next_vertex.isAdjacentTo(prev)): # new parent if default assignment was not along path
         next_vertex.parent = prev
-      # print "At ", next_vertex.state
-      # print next_vertex.state, " was popped from the stack."
       if(problem.isGoalState(next_vertex.state)):
         break
       # insert newly discovered vertices and edges
@@ -108,21 +106,18 @@ def depthFirstSearch(problem):
         add_this_edge = True
         # search adjacency list of current vertex to ensure we haven't seen an edge with the successor
         for vert in next_vertex.adjacent_verts:
-          if(vert.state == successor[0]): # if this edge is a duplicate, don't add
+          if(vert.state == successor[0]): # if this edge is a duplicate, don't add it
             add_this_edge = False
             continue
-        successor_vert = graph.findVertOfState(successor[0])      # O(n), copy or reference returned?
+        successor_vert = graph.findVertOfState(successor[0]) # O(n) search for this vertex in verts list
         # add to graph if appropriate
         if(successor_vert == None): 
           successor_vert = graph.insertVertex(successor[0], next_vertex) # str type bug
         if(add_this_edge):
-          # next_vertex.adjacent_verts.append(successor_vert)
-          # successor_vert.adjacent_verts.append(next_vertex)
           graph.insertEdge(next_vertex, successor_vert, successor[1], successor[2])
-
-      for vert in next_vertex.adjacent_verts:                     # duplicate code to top, let it go for now
+      # load up the vertices we just created into the stack
+      for vert in next_vertex.adjacent_verts:
         if(not vert.visited):
-          # print vert.state, " was pushed to the stack --- from ", next_vertex.state
           vert.visited = True
           vert_stk.push(vert)
     # trace the path
@@ -144,40 +139,32 @@ def breadthFirstSearch(problem):
     start_vertex = graph.insertVertex(problem.getStartState(), None)
     start_vertex.visited = True
     next_vertex = None
-    vert_queue.push(start_vertex)
+    vert_queue.push(start_vertex) # queue instead of stack, same otherwise
   
     while(not vert_queue.isEmpty()):
       next_vertex = vert_queue.pop()
-      # print "At ", next_vertex.state
-      # print next_vertex.state, " was popped from the stack."
       if(problem.isGoalState(next_vertex.state)):
         break
-      # insert newly discovered vertices and edges
       for successor in problem.getSuccessors(next_vertex.state):
         add_this_edge = True
-        # search adjacency list of current vertex to ensure we haven't seen an edge with the successor
         for vert in next_vertex.adjacent_verts:
-          if(vert.state == successor[0]): # if this edge is a duplicate, don't add
+          if(vert.state == successor[0]):
             add_this_edge = False
             continue
-        successor_vert = graph.findVertOfState(successor[0])      # O(n), copy or reference returned?
-        # add to graph if appropriate
+        successor_vert = graph.findVertOfState(successor[0])
         if(successor_vert == None): 
-          successor_vert = graph.insertVertex(successor[0], next_vertex) # str type bug
+          successor_vert = graph.insertVertex(successor[0], next_vertex)
         if(add_this_edge):
           graph.insertEdge(next_vertex, successor_vert, successor[1], successor[2])
 
-      for vert in next_vertex.adjacent_verts:                     # duplicate code to top, let it go for now
+      for vert in next_vertex.adjacent_verts:
         if(not vert.visited):
-          # print vert.state, " was pushed to the stack --- from ", next_vertex.state
           vert.visited = True
           vert_queue.push(vert)
-    # trace the path
     path_stk = util.Stack()
     while(next_vertex != start_vertex):
       path_stk.push(next_vertex.getBearing())
       next_vertex = next_vertex.parent
-    # flip the path
     path = []
     while(not path_stk.isEmpty()):
       path.append(path_stk.pop())
@@ -198,48 +185,40 @@ def uniformCostSearch(problem):
     while(not edge_pq.isEmpty()):
       next_edge = edge_pq.pop()
       next_vertex = next_edge.getVertexOutsideCloud()
-      # print "Edge popped:"
-      # next_edge.printSelf()
       next_vertex.parent = next_edge.oppositeTo(next_vertex)
       next_vertex.inCloud = True
-      # print "At ", next_vertex.state
-      # print next_vertex.state, " was popped from the queue."
       if(problem.isGoalState(next_vertex.state)):
         break
-      # insert newly discovered vertices and edges
       for successor in problem.getSuccessors(next_vertex.state):
         add_this_edge = True
-        # search adjacency list of current vertex to ensure we haven't seen an edge with the successor
         for vert in next_vertex.adjacent_verts:
-          if(vert.state == successor[0]): # if this edge is a duplicate, don't add
+          if(vert.state == successor[0]):
             add_this_edge = False
             continue
-        successor_vert = graph.findVertOfState(successor[0])      # O(n), copy or reference returned?
-        # add to graph if appropriate
+        successor_vert = graph.findVertOfState(successor[0])
         if(successor_vert == None): 
           successor_vert = graph.insertVertex(successor[0], next_vertex)
         if(add_this_edge):
           e = graph.insertEdge(next_vertex, successor_vert, successor[1], successor[2])
-          # print "Added Edge to graph:"
-          # e.printSelf()
 
-      for edge in next_vertex.edges:                     # duplicate code to top, let it go for now
+      for edge in next_vertex.edges:
         vert = edge.oppositeTo(next_vertex)
         if(vert != None):
           prev_accumulated_weight = next_vertex.getPrevWeight()
           if(not vert.visited):
             vert.visited = True
+            # update weight with the previous edge's weight in this path
             edge.weight += prev_accumulated_weight
+            # update the vertex's weight metric
             vert.minWeightToThisVert = edge.weight
             edge_pq.push(edge, edge.weight)
-            # print vert.state, " was pushed to the queue with weight = ", edge.weight
           elif(edge.weight + prev_accumulated_weight < vert.minWeightToThisVert):
-            # print "Min weight was ", vert.minWeightToThisVert, ", Now ", edge.weight
+            # update weight with the previous edge's weight in this path
             edge.weight += prev_accumulated_weight
+            # update the vertex's weight metric
             vert.minWeightToThisVert = edge.weight
             vert.parent = next_vertex
             edge_pq.push(edge, edge.weight)
-            # print vert.state, " was pushed to the queue ----"
     
     # trace the path
     path_stk = util.Stack()
@@ -274,55 +253,36 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     while(not edge_pq.isEmpty()):
       next_edge = edge_pq.pop()
       next_vertex = next_edge.getVertexOutsideCloud()
-      # print "Edge popped:"
-      # next_edge.printSelf()
-      # if(next_edge.oppositeTo(next_vertex) != None):
-      #   print "Assigning ", next_vertex.state, " parent, ", next_edge.oppositeTo(next_vertex).state
       next_vertex.parent = next_edge.oppositeTo(next_vertex)
       next_vertex.inCloud = True
-      # print "At ", next_vertex.state
-      # print next_vertex.state, " was popped from the queue."
       if(problem.isGoalState(next_vertex.state)):
         break
-      # insert newly discovered vertices and edges
       for successor in problem.getSuccessors(next_vertex.state):
         add_this_edge = True
-        # search adjacency list of current vertex to ensure we haven't seen an edge with the successor
         for vert in next_vertex.adjacent_verts:
-          if(vert.state == successor[0]): # if this edge is a duplicate, don't add
+          if(vert.state == successor[0]):
             add_this_edge = False
             continue
-        successor_vert = graph.findVertOfState(successor[0])      # O(n), copy or reference returned?
-        # add to graph if appropriate
+        successor_vert = graph.findVertOfState(successor[0])
         if(successor_vert == None): 
           successor_vert = graph.insertVertex(successor[0], next_vertex)
         if(add_this_edge):
           e = graph.insertEdge(next_vertex, successor_vert, successor[1], successor[2])
-          # print "Added Edge to graph:"
-          # e.printSelf()
 
-      for edge in next_vertex.edges:                     # duplicate code to top, let it go for now
+      for edge in next_vertex.edges:
         vert = edge.oppositeTo(next_vertex)
         if(vert != None):
           prev_accumulated_weight = next_vertex.getPrevWeight()
-          # if(vert.parent != None):
-            # print "weight from ", vert.state, "to ", vert.parent.state, " is ", prev_accumulated_weight
           if(not vert.visited):
             vert.visited = True
             edge.weight += prev_accumulated_weight
             vert.minWeightToThisVert = edge.weight
-            edge_pq.push(edge, edge.weight + heuristic(vert.state, problem))
-            # print "Assigning ", vert.state, " parent, ", next_vertex.state
-            # print vert.state, " was pushed to the queue with weight = ", edge.weight
+            edge_pq.push(edge, edge.weight + heuristic(vert.state, problem)) # add the heuristic to the priority
           elif(edge.weight + prev_accumulated_weight < vert.minWeightToThisVert): # heuristic is canceled out since this case is given that heuristic is same since state is same
             edge.weight += prev_accumulated_weight
-            # print "Min weight to ", vert.state, " was ", vert.minWeightToThisVert, ", Now ", edge.weight, " from Edge: "
-            # edge.printSelf()
             vert.minWeightToThisVert = edge.weight
-            # print "Assigning ", vert.state, " parent, ", next_vertex.state
             vert.parent = next_vertex
-            edge_pq.push(edge, edge.weight + heuristic(vert.state, problem))
-            # print vert.state, " was pushed to the queue ----"
+            edge_pq.push(edge, edge.weight + heuristic(vert.state, problem)) # add the heuristic to the priority
     
     # trace the path
     path_stk = util.Stack()
